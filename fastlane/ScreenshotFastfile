@@ -61,6 +61,67 @@ platform :ios do
   end
 
   #####################################################################################
+  # jetpack_screenshots
+  # -----------------------------------------------------------------------------------
+  # This lane generates the localised jetpack screenshots.
+  # It is the same as running bundle exec fastlane snapshot, but ensures that the app
+  # is only built once.
+  # -----------------------------------------------------------------------------------
+  # Usage:
+  # bundle exec fastlane jetpack_screenshots
+  #
+  # Example:
+  # bundle exec fastlane jetpack_screenshots
+  #####################################################################################
+  desc "Generate localised Jetpack screenshots"
+  lane :jetpack_screenshots  do |options|
+    fastlane_directory = File.expand_path File.dirname(__FILE__)
+    derived_data_path = File.join(fastlane_directory, "DerivedData")
+
+    sh('bundle exec pod install')
+    FileUtils.rm_rf(derived_data_path)
+
+    scan(
+      workspace: WORKSPACE_PATH,
+      scheme: "JetpackScreenshotGeneration",
+      build_for_testing: true,
+      derived_data_path: derived_data_path,
+    )
+
+    languages = "en-US".split(" ")
+
+    # Allow creating screenshots for just one languages
+    if options[:language] != nil
+      languages.keep_if { |language|
+        language.casecmp(options[:language]) == 0
+      }
+    end
+
+    puts languages
+
+    [true, false].each { | dark_mode_enabled |
+      capture_ios_screenshots(
+        workspace: WORKSPACE_PATH,
+        scheme: "JetpackScreenshotGeneration",
+        test_without_building: true,
+        derived_data_path: derived_data_path,
+        languages: languages,
+        dark_mode: dark_mode_enabled,
+        override_status_bar: true,
+
+        reinstall_app: true,
+        erase_simulator: true,
+        localize_simulator: true,
+        concurrent_simulators: true,
+
+        devices: [
+          "iPhone 8 Plus"
+        ],
+      )
+    }
+  end
+
+  #####################################################################################
   # create_promo_screenshots
   # -----------------------------------------------------------------------------------
   # This lane generates the promo screenshots. 
