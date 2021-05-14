@@ -213,6 +213,28 @@ import WordPressFlux
         return controller
     }
 
+    private static var reusableReaderStreamViewController: ReaderStreamViewController?
+
+    /// Convenience method for instantiating (or retrieving an existent) instance
+    /// of ReaderStreamViewController for a existing topic.
+    ///
+    /// - Parameters:
+    ///     - topic: Any subclass of ReaderAbstractTopic
+    ///
+    /// - Returns: A new instance of the controller or an existing one
+    ///
+    @objc class func reusableControllerWithTopic(_ topic: ReaderAbstractTopic) -> ReaderStreamViewController {
+        // if a default discover topic is provided, treat it as a site to retrieve the header
+        if ReaderHelpers.topicIsDiscover(topic) {
+            return controllerWithSiteID(ReaderHelpers.discoverSiteID, isFeed: false)
+        }
+
+        let controller = reusableReaderStreamViewController ?? ReaderStreamViewController()
+        controller.readerTopic = topic
+        reusableReaderStreamViewController = controller
+        return controller
+    }
+
 
     /// Convenience method for instantiating an instance of ReaderStreamViewController
     /// for previewing the content of a site.

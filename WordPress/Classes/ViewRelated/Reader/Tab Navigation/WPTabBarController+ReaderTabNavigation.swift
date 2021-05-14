@@ -43,7 +43,7 @@ extension WPTabBarController {
         if content.topicType == .discover, let topic = content.topic {
             return ReaderCardsStreamViewController.controller(topic: topic)
         } else if let topic = content.topic {
-            return ReaderStreamViewController.controllerWithTopic(topic)
+            return ReaderStreamViewController.reusableControllerWithTopic(topic)
         } else {
             return ReaderStreamViewController.controllerForContentType(content.type)
         }
